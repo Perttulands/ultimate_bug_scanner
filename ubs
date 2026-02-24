@@ -54,6 +54,25 @@ json_escape(){
   printf '%s' "$s"
 }
 
+# Defensive wrapper for JSON escaping.
+# If json_escape is unavailable for any reason (for example a stale/local script
+# with function-order regression), keep scan/report paths alive instead of
+# crashing with "command not found".
+json_escape_safe(){
+  local raw="${1:-}"
+  if declare -F json_escape >/dev/null 2>&1; then
+    json_escape "$raw"
+    return
+  fi
+  local s="$raw"
+  s=${s//\\/\\\\}
+  s=${s//\"/\\\"}
+  s=${s//$'\n'/\\n}
+  s=${s//$'\r'/\\r}
+  s=${s//$'\t'/\\t}
+  printf '%s' "$s"
+}
+
 load_ignore_patterns(){
   local file="$1"
   [[ -f "$file" ]] || return 0
@@ -2214,7 +2233,7 @@ parse_text_to_json(){
   fi
   critical=${critical:-0}; warning=${warning:-0}; info=${info:-0}; files=${files:-0}
   local proj_display
-  proj_display="$(json_escape "${SOURCE_PROJECT_DIR:-$PROJECT_DIR}")"
+  proj_display="$(json_escape_safe "${SOURCE_PROJECT_DIR:-$PROJECT_DIR}")"
   cat >"$json" <<JSON
 {"language":"$lang","project":"$proj_display","files":$files,"critical":$critical,"warning":$warning,"info":$info,"timestamp":"$(date_iso)"}
 JSON
@@ -2282,7 +2301,7 @@ parse_sarif_to_json(){
   files=$(jq '[.runs[]?.results[]?.locations[]?.physicalLocation?.artifactLocation?.uri?] | unique | length' "$sarif" 2>/dev/null || echo 0)
   critical=${critical:-0}; warning=${warning:-0}; info=${info:-0}; files=${files:-0}
   local proj_display
-  proj_display="$(json_escape "${SOURCE_PROJECT_DIR:-$PROJECT_DIR}")"
+  proj_display="$(json_escape_safe "${SOURCE_PROJECT_DIR:-$PROJECT_DIR}")"
   cat >"$json" <<JSON
 {"language":"$lang","project":"$proj_display","files":$files,"critical":$critical,"warning":$warning,"info":$info,"timestamp":"$(date_iso)"}
 JSON
@@ -2599,11 +2618,11 @@ emit_env_error_report(){
 }
 
 emit_env_error_json(){
-  local proj; proj="$(json_escape "${SOURCE_PROJECT_DIR:-$PROJECT_DIR}")"
+  local proj; proj="$(json_escape_safe "${SOURCE_PROJECT_DIR:-$PROJECT_DIR}")"
   local modules_json=""
   local first=1
   for lang in "${ENV_ERROR_LANGS[@]}"; do
-    local lang_json; lang_json="$(json_escape "$lang")"
+    local lang_json; lang_json="$(json_escape_safe "$lang")"
     if [[ $first -eq 1 ]]; then
       modules_json="\"$lang_json\""
       first=0
