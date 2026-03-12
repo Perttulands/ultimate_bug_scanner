@@ -80,6 +80,8 @@ jobs:
           cd test-suite
           uv run python shareable/test_shareable_reports.py
           uv run python python/tests/test_resource_helper.py
+          uv run python python/tests/test_git_safety_guard.py
+          uv run python python/tests/test_meta_runner_contracts.py
           uv run python java/tests/test_resource_lifecycle_helper.py
 
   lint:

@@ -1,5 +1,5 @@
 [check]
-test = ["bash", "-lc", "cd test-suite && uv run python run_manifest.py --fail-fast --case js-core-buggy --case js-core-clean --case js-node-buggy --case js-node-clean --case golang-buggy --case golang-clean --case cpp-buggy --case cpp-clean --case rust-buggy --case rust-clean --case java-buggy --case java-clean --case ruby-buggy --case ruby-clean && uv run python shareable/test_shareable_reports.py && uv run python python/tests/test_resource_helper.py && uv run python java/tests/test_resource_lifecycle_helper.py"]
+test = ["bash", "-lc", "cd test-suite && uv run python run_manifest.py --fail-fast --case js-core-buggy --case js-core-clean --case js-node-buggy --case js-node-clean --case golang-buggy --case golang-clean --case cpp-buggy --case cpp-clean --case rust-buggy --case rust-clean --case java-buggy --case java-clean --case ruby-buggy --case ruby-clean && uv run python shareable/test_shareable_reports.py && uv run python python/tests/test_resource_helper.py && uv run python python/tests/test_git_safety_guard.py && uv run python python/tests/test_meta_runner_contracts.py && uv run python java/tests/test_resource_lifecycle_helper.py"]
 truthsayer_ci = ["truthsayer", "ci", "."]
 
 [[check.lint]]
