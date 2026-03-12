@@ -2648,17 +2648,19 @@ if [[ -n "$SUMMARY_JSON" ]]; then
   if [[ -n "${AG_STREAM_FILE:-}" && -s "${AG_STREAM_FILE:-}" && "$HAS_AST_GREP" -eq 1 ]]; then
       printf '"ast_grep_rules":['
    if command -v python3 >/dev/null 2>&1; then
-    cat "$AG_STREAM_FILE" 2>/dev/null | python3 - <<'PY'
+    python3 - "$AG_STREAM_FILE" <<'PY'
 import json,sys,collections
+stream_path = sys.argv[1]
 seen=collections.Counter()
-for line in sys.stdin:
-  line=line.strip()
-  if not line: continue
-  try:
-    rid=(json.loads(line).get('rule_id') or 'unknown')
-    seen[rid]+=1
-  except:
-    pass
+with open(stream_path, encoding="utf-8") as stream:
+  for line in stream:
+    line=line.strip()
+    if not line: continue
+    try:
+      rid=(json.loads(line).get('rule_id') or 'unknown')
+      seen[rid]+=1
+    except:
+      pass
 print(",".join(json.dumps({"id":k,"count":v}) for k,v in seen.items()))
 PY
    else

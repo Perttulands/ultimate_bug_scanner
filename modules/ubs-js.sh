@@ -1341,7 +1341,11 @@ DESTRUCT_OBJECT = re.compile(r"^(?:const|let|var)\s*\{([^}]*)\}\s*=\s*(.+)")
 DESTRUCT_ARRAY = re.compile(r"^(?:const|let|var)\s*\[([^]]*)\]\s*=\s*(.+)")
 
 def should_skip(path: Path) -> bool:
-    return any(part in SKIP_DIRS for part in path.parts)
+    try:
+        rel_parts = path.relative_to(ROOT).parts if ROOT.is_dir() else (path.name,)
+    except ValueError:
+        rel_parts = path.parts
+    return any(part in SKIP_DIRS for part in rel_parts)
 
 def iter_js_files(root: Path):
     if root.is_file():

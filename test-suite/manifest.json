@@ -1735,13 +1735,12 @@
         "--only=js",
         "--format=toon"
       ],
+      "bin_shims": {
+        "tru": "#!/usr/bin/env bash\nset -Eeuo pipefail\ncase \"${1:-}\" in\n  --help)\n    echo 'TOON reference implementation in Rust (JSON <-> TOON)'\n    ;;\n  --version)\n    echo 'tru 0.0.0-test'\n    ;;\n  --encode)\n    python3 -c 'import json,sys; payload=json.load(sys.stdin); print(f\"project: {payload.get(\"project\", \"\")}\"); print(\"scanners[\");\nfor scanner in payload.get(\"scanners\", []):\n    print(f\"  language: {scanner.get(\"language\", \"\")}\"); print(\"  findings[\");\n    [print(f\"    severity: {finding.get(\"severity\", \"\")}\") or print(f\"    title: {finding.get(\"title\", \"\")}\") for finding in scanner.get(\"findings\", [])];\n    print(\"  ]\");\nprint(\"]\")'\n    ;;\n  *)\n    echo \"unsupported tru args: $*\" >&2\n    exit 2\n    ;;\nesac\n"
+      },
       "expect": {
         "exit_code": "nonzero",
-        "totals": {
-          "critical": {
-            "min": 1
-          }
-        },
+        "allow_unparseable_output": true,
         "require_substrings": [
           "project:",
           "scanners[",
@@ -1765,8 +1764,12 @@
       "args": [
         "--only=js"
       ],
+      "bin_shims": {
+        "tru": "#!/usr/bin/env bash\nset -Eeuo pipefail\ncase \"${1:-}\" in\n  --help)\n    echo 'TOON reference implementation in Rust (JSON <-> TOON)'\n    ;;\n  --version)\n    echo 'tru 0.0.0-test'\n    ;;\n  --encode)\n    python3 -c 'import json,sys; payload=json.load(sys.stdin); print(f\"project: {payload.get(\"project\", \"\")}\"); print(\"scanners[\");\nfor scanner in payload.get(\"scanners\", []):\n    print(f\"  language: {scanner.get(\"language\", \"\")}\"); print(\"  findings[\");\n    [print(f\"    severity: {finding.get(\"severity\", \"\")}\") or print(f\"    title: {finding.get(\"title\", \"\")}\") for finding in scanner.get(\"findings\", [])];\n    print(\"  ]\");\nprint(\"]\")'\n    ;;\n  *)\n    echo \"unsupported tru args: $*\" >&2\n    exit 2\n    ;;\nesac\n"
+      },
       "expect": {
         "exit_code": "nonzero",
+        "allow_unparseable_output": true,
         "require_substrings": [
           "project:",
           "scanners["

@@ -1977,40 +1977,44 @@ count=0
 division_report=""
 if [[ "$HAS_AST_GREP" -eq 1 ]] && command -v python3 >/dev/null 2>&1; then
   division_report=$(
-    ( set +o pipefail; "${AST_GREP_CMD[@]}" run -p '$A / $B' -l python "$PROJECT_DIR" --json=stream 2>/dev/null || true ) \
-      | python3 - "$DETAIL_LIMIT" <<'PY'
+    python3 - "$DETAIL_LIMIT" <(
+      set +o pipefail
+      "${AST_GREP_CMD[@]}" run -p '$A / $B' -l python "$PROJECT_DIR" --json=stream 2>/dev/null || true
+    ) <<'PY'
 import json
 import re
 import sys
 
 limit = int(sys.argv[1])
+stream_path = sys.argv[2]
 count = 0
 samples: list[str] = []
 
-for raw in sys.stdin:
-    raw = raw.strip()
-    if not raw:
-        continue
-    try:
-        obj = json.loads(raw)
-    except json.JSONDecodeError:
-        continue
+with open(stream_path, encoding="utf-8") as stream:
+    for raw in stream:
+        raw = raw.strip()
+        if not raw:
+            continue
+        try:
+            obj = json.loads(raw)
+        except json.JSONDecodeError:
+            continue
 
-    singles = (obj.get("metaVariables") or {}).get("single") or {}
-    denom = (singles.get("B") or {}).get("text") or ""
-    if not re.match(r"^[A-Za-z_]", denom):
-        continue
+        singles = (obj.get("metaVariables") or {}).get("single") or {}
+        denom = (singles.get("B") or {}).get("text") or ""
+        if not re.match(r"^[A-Za-z_]", denom):
+            continue
 
-    count += 1
-    if len(samples) >= limit:
-        continue
+        count += 1
+        if len(samples) >= limit:
+            continue
 
-    file = obj.get("file") or ""
-    start_line = ((obj.get("range") or {}).get("start") or {}).get("line")
-    line = (start_line + 1) if isinstance(start_line, int) else 0
-    code = (obj.get("lines") or "").strip()
-    if file and line and code:
-        samples.append(f"{file}:{line}:{code}")
+        file = obj.get("file") or ""
+        start_line = ((obj.get("range") or {}).get("start") or {}).get("line")
+        line = (start_line + 1) if isinstance(start_line, int) else 0
+        code = (obj.get("lines") or "").strip()
+        if file and line and code:
+            samples.append(f"{file}:{line}:{code}")
 
 print(count)
 for sample in samples:
