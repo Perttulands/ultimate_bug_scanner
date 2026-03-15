@@ -396,7 +396,7 @@ A mail-like layer that lets coding agents coordinate asynchronously via MCP tool
 
 Beads provides a lightweight, dependency-aware issue database and CLI (`br` - beads_rust) for selecting "ready work," setting priorities, and tracking status. It complements MCP Agent Mail's messaging and file reservations.
 
-**Important:** `br` is non-invasive—it NEVER runs git commands automatically. You must manually commit changes after `br sync --flush-only`.
+**Important:** `br` is non-invasive—it NEVER runs git commands automatically. You must manually commit changes after `br sync --snapshot`.
 
 ### Conventions
 
@@ -426,7 +426,7 @@ Beads provides a lightweight, dependency-aware issue database and CLI (`br` - be
 5. **Complete and release:**
    ```bash
    br close 123 --reason "Completed"
-   br sync --flush-only  # Export to JSONL (no git operations)
+   br sync --snapshot  # Export to JSONL (no git operations)
    ```
    ```
    release_file_reservations(project_key, agent_name, paths=["src/**"])
@@ -679,7 +679,7 @@ Returns structured results with file paths, line ranges, and extracted code snip
 
 This project uses [beads_rust](https://github.com/Dicklesworthstone/beads_rust) (`br`) for issue tracking. Issues are stored in `.beads/` and tracked in git.
 
-**Important:** `br` is non-invasive—it NEVER executes git commands. After `br sync --flush-only`, you must manually run `git add .beads/ && git commit`.
+**Important:** `br` is non-invasive—it NEVER executes git commands. After `br sync --snapshot`, you must manually run `git add .beads/ && git commit`.
 
 ### Essential Commands
 
@@ -695,7 +695,7 @@ br create --title="..." --type=task --priority=2
 br update <id> --status=in_progress
 br close <id> --reason "Completed"
 br close <id1> <id2>  # Close multiple issues at once
-br sync --flush-only  # Export to JSONL (NO git operations)
+br sync --snapshot  # Export to JSONL (NO git operations)
 ```
 
 ### Workflow Pattern
@@ -704,7 +704,7 @@ br sync --flush-only  # Export to JSONL (NO git operations)
 2. **Claim**: Use `br update <id> --status=in_progress`
 3. **Work**: Implement the task
 4. **Complete**: Use `br close <id>`
-5. **Sync**: Run `br sync --flush-only` then manually commit
+5. **Sync**: Run `br sync --snapshot` then manually commit
 
 ### Key Concepts
 
@@ -720,7 +720,7 @@ br sync --flush-only  # Export to JSONL (NO git operations)
 ```bash
 git status              # Check what changed
 git add <files>         # Stage code changes
-br sync --flush-only    # Export beads to JSONL
+br sync --snapshot    # Export beads to JSONL
 git add .beads/         # Stage beads changes
 git commit -m "..."     # Commit everything together
 git push                # Push to remote
@@ -732,7 +732,7 @@ git push                # Push to remote
 - Update status as you work (in_progress -> closed)
 - Create new issues with `br create` when you discover tasks
 - Use descriptive titles and set appropriate priority/type
-- Always `br sync --flush-only && git add .beads/` before ending session
+- Always `br sync --snapshot && git add .beads/` before ending session
 
 <!-- end-bv-agent-instructions -->
 
@@ -796,7 +796,7 @@ Treat cass as a way to avoid re-solving problems other agents already handled.
 1. **File issues for remaining work** - Create issues for anything that needs follow-up
 2. **Run quality gates** (if code changed) - Tests, linters, builds
 3. **Update issue status** - Close finished work, update in-progress items
-4. **Sync beads** - `br sync --flush-only` to export to JSONL
+4. **Sync beads** - `br sync --snapshot` to export to JSONL
 5. **Hand off** - Provide context for next session
 
 ---
